@@ -5,6 +5,8 @@ import ContactForm from './component/ContactForm';
 import Filter from './component/Filter';
 import ContactList from './component/ContactList';
 
+const LOCAL_STOR_KEY = 'contacts';
+
 class App extends Component {
   state = {
     contacts: [
@@ -16,25 +18,25 @@ class App extends Component {
     filter: '',
   };
 
-  contacts = () => {
-    const data = localStorage.getItem('contacts');
-    return JSON.parse(data);
-  };
-
   componentDidMount() {
-    if (this.contacts()) {
-      this.setState({ contacts: this.contacts() });
+    if (this.getContacts() > 0) {
+      this.setState({ contacts: this.getContacts() });
     }
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.contacts !== this.state.contacts) {
       localStorage.setItem(
-        'contacts',
+        LOCAL_STOR_KEY,
         JSON.stringify([...this.state.contacts]),
       );
     }
   }
+
+  getContacts = () => {
+    const data = localStorage.getItem(LOCAL_STOR_KEY);
+    return JSON.parse(data);
+  };
 
   handleContactFormSubmit = ({ name, number, id }) => {
     const { contacts } = this.state;
@@ -56,8 +58,15 @@ class App extends Component {
     }));
   };
 
-  handleChange = e => {
-    this.setState({ [e.currentTarget.name]: e.currentTarget.value });
+  handleChange = ({ target: { name, value } }) => {
+    this.setState({ [name]: value });
+  };
+
+  filteredContacts = (contacts, filter) => {
+    const normilizedFilter = filter.toLowerCase();
+    return contacts.filter(({ name }) =>
+      name.toLowerCase().includes(normilizedFilter),
+    );
   };
 
   render() {
@@ -69,13 +78,16 @@ class App extends Component {
           <ContactForm onSubmit={this.handleContactFormSubmit} />
         </section>
         <section>
-          <h2>Contacts</h2>
-          <Filter onChange={this.handleChange} filter={filter} />
-          <ContactList
-            filter={filter}
-            contacts={contacts}
-            onDeleteContact={this.deleteContact}
-          />
+          {contacts.length > 0 && <h2>Contacts</h2>}
+          {contacts.length > 3 && (
+            <Filter onChange={this.handleChange} filter={filter} />
+          )}
+          {contacts.length > 0 && (
+            <ContactList
+              contacts={this.filteredContacts(contacts, filter)}
+              onDeleteContact={this.deleteContact}
+            />
+          )}
         </section>
       </>
     );

@@ -6,7 +6,8 @@
 }
 
 .formLabel {
-  display: block;
+  display: flex;
+  flex-flow: column wrap;
   margin-bottom: 10px;
 }
 
@@ -21,9 +22,11 @@
   border-radius: 10px;
   padding: 10px 30px;
   text-transform: capitalize;
+  outline: none;
 }
 
 .formBtn:hover {
+  outline: none;
   cursor: pointer;
   background-color: green;
   color: white;
